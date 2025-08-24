@@ -1,12 +1,33 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useMapperStore } from '../stores/mapperStore';
 import { useHotelStore } from '../stores/hotelStore';
-import {
-  Point,
-  PixelCoordinates,
-  NormalizedCoordinates,
-  DrawingTool,
-} from '../types';
+// Define types locally to avoid import issues
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface PixelCoordinates {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface NormalizedCoordinates {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+enum DrawingTool {
+  SELECT = 'select',
+  RECTANGLE = 'rectangle',
+  PAN = 'pan',
+  ZOOM_IN = 'zoom_in',
+  ZOOM_OUT = 'zoom_out',
+}
 import { normalizeCoordinates, denormalizeCoordinates } from '../utils/coordinates';
 
 interface UseCanvasDrawingOptions {

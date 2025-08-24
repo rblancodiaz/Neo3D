@@ -1,4 +1,22 @@
-import { NormalizedCoordinates, PixelCoordinates, Point } from '../types';
+// Define coordinate types locally
+interface Point {
+  x: number;
+  y: number;
+}
+
+interface PixelCoordinates {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface NormalizedCoordinates {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 /**
  * Convert pixel coordinates to normalized coordinates (0-1 range)

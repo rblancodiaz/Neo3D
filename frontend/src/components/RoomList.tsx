@@ -2,7 +2,7 @@ import React from 'react';
 import { Bed, Trash2, Edit2 } from 'lucide-react';
 import { useHotelStore } from '../stores/hotelStore';
 import { useMapperStore } from '../stores/mapperStore';
-import { RoomStatus, RoomType } from '../types';
+import { RoomStatus, RoomType } from '../types/hotel';
 import { clsx } from 'clsx';
 
 export const RoomList: React.FC = () => {

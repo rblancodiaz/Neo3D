@@ -1,13 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import {
-  Hotel,
-  Floor,
-  Room,
-  ApiResponse,
-  PaginatedResponse,
-  RoomFormData,
-  NormalizedCoordinates,
-} from '../types';
+import { Hotel, Floor, Room, RoomFormData, NormalizedCoordinates } from '../types/hotel';
+import { ApiResponse, PaginatedResponse } from '../types/api';
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
