@@ -15,7 +15,9 @@
       "Bash(docker:*)",
       "Bash(cmd.exe:*)",
       "Bash(npm run build:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(start http://localhost:5173)",
+      "Bash(start D:devprojectsNeo3Dtest-upload.html)"
     ],
     "deny": [],
     "ask": [],

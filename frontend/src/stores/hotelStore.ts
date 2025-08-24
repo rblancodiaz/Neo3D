@@ -90,15 +90,70 @@ export const useHotelStore = create<HotelStore>()(
       createHotel: async (data) => {
         set({ isLoadingHotels: true, error: null });
         try {
+          console.log('Sending hotel creation request...');
           const response = await hotelApi.createHotel(data);
-          const newHotel = response.data;
-          set((state) => ({
-            hotels: [...state.hotels, newHotel],
-            currentHotel: newHotel,
-            isLoadingHotels: false,
-          }));
+          console.log('Hotel API response:', response);
+          
+          let newHotel = response.data;
+          
+          // The response structure might be wrapped in { hotel: {...} }
+          if (response.data.hotel) {
+            newHotel = response.data.hotel;
+          }
+          
+          console.log('Parsed hotel data:', newHotel);
+          console.log('Hotel image URLs:', {
+            processedImageUrl: newHotel.processedImageUrl,
+            originalImageUrl: newHotel.originalImageUrl,
+            thumbnailUrl: newHotel.thumbnailUrl,
+          });
+          
+          // Initialize hotel with empty floors array if not present
+          if (!newHotel.floors) {
+            newHotel.floors = [];
+          }
+          
+          // Create a default floor for the new hotel
+          try {
+            console.log('Creating default floor for hotel:', newHotel.id);
+            const floorResponse = await hotelApi.createFloor(newHotel.id, {
+              number: 1,
+              name: 'Ground Floor',
+            });
+            console.log('Floor API response:', floorResponse);
+            
+            let newFloor = floorResponse.data;
+            
+            // Handle wrapped response
+            if (floorResponse.data.floor) {
+              newFloor = floorResponse.data.floor;
+            }
+            
+            newHotel.floors.push(newFloor);
+            
+            console.log('Setting hotel with floor in store:', { hotel: newHotel, floor: newFloor });
+            
+            // Set the new floor as current floor
+            set((state) => ({
+              hotels: [...state.hotels, newHotel],
+              currentHotel: newHotel,
+              currentFloor: newFloor,
+              isLoadingHotels: false,
+            }));
+          } catch (floorError) {
+            // If floor creation fails, still set the hotel
+            console.error('Failed to create default floor:', floorError);
+            set((state) => ({
+              hotels: [...state.hotels, newHotel],
+              currentHotel: newHotel,
+              currentFloor: null,
+              isLoadingHotels: false,
+            }));
+          }
+          
           return newHotel;
         } catch (error: any) {
+          console.error('Error in createHotel:', error);
           set({
             error: error.message || 'Failed to create hotel',
             isLoadingHotels: false,

@@ -47,12 +47,20 @@ export const hotelApi = {
   getHotel: (id: string) =>
     apiClient.get<ApiResponse<Hotel>>(`/hotels/${id}`),
   
-  createHotel: (data: FormData) =>
-    apiClient.post<ApiResponse<Hotel>>('/hotels', data, {
+  createHotel: (data: FormData) => {
+    console.log('API: Creating hotel with FormData');
+    return apiClient.post<ApiResponse<Hotel>>('/hotels', data, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-    }),
+    }).then(response => {
+      console.log('API: Hotel creation response:', response);
+      return response;
+    }).catch(error => {
+      console.error('API: Hotel creation error:', error.response || error);
+      throw error;
+    });
+  },
   
   updateHotel: (id: string, data: Partial<Hotel>) =>
     apiClient.put<ApiResponse<Hotel>>(`/hotels/${id}`, data),

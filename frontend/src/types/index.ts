@@ -26,6 +26,8 @@ export interface Hotel {
   name: string;
   description?: string;
   imageUrl?: string;
+  originalImageUrl?: string;
+  processedImageUrl?: string;
   thumbnailUrl?: string;
   imageWidth?: number;
   imageHeight?: number;

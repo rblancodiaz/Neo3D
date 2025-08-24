@@ -29,6 +29,18 @@ function App() {
     toggleSidebar,
     showToast,
   } = useUIStore();
+  
+  // Debug log for currentHotel
+  useEffect(() => {
+    console.log('currentHotel changed:', currentHotel);
+    if (currentHotel) {
+      console.log('Hotel URLs:', {
+        processedImageUrl: currentHotel.processedImageUrl,
+        originalImageUrl: currentHotel.originalImageUrl,
+        thumbnailUrl: currentHotel.thumbnailUrl,
+      });
+    }
+  }, [currentHotel]);
 
   // Load hotels on mount
   useEffect(() => {
@@ -62,13 +74,19 @@ function App() {
       formData.append('name', `Hotel ${Date.now()}`);
       formData.append('image', file);
       
+      console.log('Creating hotel with image upload...');
       const hotel = await createHotel(formData);
-      setCurrentHotel(hotel);
+      console.log('Hotel created:', hotel);
+      
+      // The createHotel function already sets currentHotel and currentFloor
+      // so we don't need to call setCurrentHotel again
+      
       showToast({
         type: 'success',
         message: 'Hotel created successfully!',
       });
     } catch (error) {
+      console.error('Error creating hotel:', error);
       showToast({
         type: 'error',
         message: 'Failed to create hotel',
@@ -161,8 +179,11 @@ function App() {
         
         {/* Canvas area */}
         <div className="flex-1 p-4">
-          {currentHotel ? (
-            <ImageMapper className="w-full h-full rounded-lg shadow-lg" />
+          {currentHotel && currentHotel.processedImageUrl ? (
+            <ImageMapper 
+              imageUrl={currentHotel.processedImageUrl}
+              className="w-full h-full rounded-lg shadow-lg" 
+            />
           ) : (
             <div className="w-full h-full bg-white rounded-lg shadow-lg flex items-center justify-center">
               <div className="text-center">

@@ -34,16 +34,21 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
 
   // Load image
   useEffect(() => {
-    if (!imageUrl) return;
+    if (!imageUrl) {
+      console.log('No imageUrl provided to useCanvasDrawing');
+      return;
+    }
     
+    console.log('Loading image from URL:', imageUrl);
     const img = new Image();
     img.onload = () => {
+      console.log('Image loaded successfully:', imageUrl, 'Dimensions:', img.width, 'x', img.height);
       imageRef.current = img;
       setImageElement(img);
       render();
     };
-    img.onerror = () => {
-      console.error('Failed to load image:', imageUrl);
+    img.onerror = (error) => {
+      console.error('Failed to load image:', imageUrl, error);
     };
     img.src = imageUrl;
     

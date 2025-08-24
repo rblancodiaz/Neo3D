@@ -20,7 +20,7 @@ export const ImageMapper: React.FC<ImageMapperProps> = ({ imageUrl, className })
   
   const { isDrawing, currentRect, selectedRoom, hoveredRoom } = useCanvasDrawing({
     canvasRef,
-    imageUrl: imageUrl || currentHotel?.imageUrl,
+    imageUrl: imageUrl || currentHotel?.processedImageUrl || currentHotel?.originalImageUrl || currentHotel?.imageUrl,
   });
 
   // Update canvas size on container resize
