@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Op } from 'sequelize';
 import { Hotel, Floor, Room } from '../models';
 import imageService from '../services/imageService';
-import { sendSuccess, sendCreated, sendNotFound, sendPaginated, sendNoContent, sendServerError } from '../utils/response';
+import { sendSuccess, sendCreated, sendNotFound, sendPaginated, sendNoContent } from '../utils/response';
 import { ApiError, ErrorCode } from '../types/api';
 import { logInfo } from '../utils/logger';
 import slugify from 'slugify';

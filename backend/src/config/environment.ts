@@ -119,3 +119,13 @@ export const dbConfig = {
     freezeTableName: true,
   },
 };
+
+// Export upload configuration
+export const uploadConfig = {
+  maxFileSize: config.MAX_FILE_SIZE,
+  allowedFileTypes: config.ALLOWED_FILE_TYPES.split(','),
+  uploadPath: config.UPLOAD_PATH,
+  tempPath: config.UPLOAD_TEMP_PATH,
+  processedPath: paths.processed,
+  thumbnailPath: paths.thumbnails,
+};

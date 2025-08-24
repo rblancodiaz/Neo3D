@@ -51,11 +51,9 @@ export const initDatabase = async (): Promise<void> => {
     await sequelize.authenticate();
     console.log('Database connection established successfully.');
 
-    // Sync models with database (use carefully in production)
-    if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
-      console.log('Database models synchronized.');
-    }
+    // Don't sync models since tables already exist
+    // Models will validate against existing schema
+    console.log('Using existing database schema.');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
     throw error;

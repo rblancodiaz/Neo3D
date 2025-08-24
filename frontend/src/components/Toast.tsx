@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import { useUIStore } from '../stores/uiStore';
-import { Toast as ToastType } from '../types/ui';
+import type { Toast as ToastType } from '../types';
 import { clsx } from 'clsx';
 
 const ToastItem: React.FC<{ toast: ToastType }> = ({ toast }) => {

@@ -1,11 +1,10 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import path from 'path';
 import { config, paths } from './config/environment';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { generalLimiter } from './middleware/rateLimiter';
-import logger, { stream } from './utils/logger';
+import { stream } from './utils/logger';
 import hotelRoutes from './routes/hotels';
 import floorRoutes from './routes/floors';
 import roomRoutes from './routes/rooms';

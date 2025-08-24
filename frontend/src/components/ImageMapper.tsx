@@ -2,14 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useCanvasDrawing } from '../hooks/useCanvasDrawing';
 import { useMapperStore } from '../stores/mapperStore';
 import { useHotelStore } from '../stores/hotelStore';
-// DrawingTool enum defined locally
-enum DrawingTool {
-  SELECT = 'select',
-  RECTANGLE = 'rectangle',
-  PAN = 'pan',
-  ZOOM_IN = 'zoom_in',
-  ZOOM_OUT = 'zoom_out',
-}
+import { DrawingTool } from '../types';
 import { clsx } from 'clsx';
 
 interface ImageMapperProps {

@@ -12,14 +12,7 @@ import {
   Save,
 } from 'lucide-react';
 import { useMapperStore } from '../stores/mapperStore';
-// Import DrawingTool from canvas types
-enum DrawingTool {
-  SELECT = 'select',
-  RECTANGLE = 'rectangle',
-  PAN = 'pan',
-  ZOOM_IN = 'zoom_in',
-  ZOOM_OUT = 'zoom_out',
-}
+import { DrawingTool } from '../types';
 import { clsx } from 'clsx';
 
 interface ToolButtonProps {

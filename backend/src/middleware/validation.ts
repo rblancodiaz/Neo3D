@@ -126,7 +126,7 @@ export const paginationSchema = z.object({
 
 // Validation middleware factory
 export const validate = (schema: ZodSchema) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       await schema.parseAsync({
         body: req.body,
@@ -141,7 +141,8 @@ export const validate = (schema: ZodSchema) => {
           message: err.message,
         }));
         
-        return sendValidationError(res, formattedErrors);
+        sendValidationError(res, formattedErrors);
+        return;
       }
       next(error);
     }

@@ -1,42 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-
-// Types defined directly in this file to avoid import issues
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface PixelCoordinates {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-interface DrawingState {
-  isDrawing: boolean;
-  startPoint: Point | null;
-  currentRect: PixelCoordinates | null;
-  selectedRoomId: string | null;
-  hoveredRoomId: string | null;
-}
-
-interface ViewportState {
-  scale: number;
-  offsetX: number;
-  offsetY: number;
-  isDragging: boolean;
-  dragStart: Point | null;
-}
-
-enum DrawingTool {
-  SELECT = 'select',
-  RECTANGLE = 'rectangle',
-  PAN = 'pan',
-  ZOOM_IN = 'zoom_in',
-  ZOOM_OUT = 'zoom_out',
-}
+import { DrawingTool } from '../types';
+import type { Point, PixelCoordinates, DrawingState, ViewportState } from '../types';
 
 interface MapperStore {
   // Canvas state

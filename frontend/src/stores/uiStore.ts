@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Toast, Modal } from '../types/ui';
+import type { Toast, Modal } from '../types';
 
 interface UIStore {
   // Toasts

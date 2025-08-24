@@ -7,7 +7,15 @@
       "Bash(npm install:*)",
       "Bash(npm create:*)",
       "Bash(true)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(powershell:*)",
+      "Bash(npx tsc:*)",
+      "Bash(curl:*)",
+      "Bash(dir:*)",
+      "Bash(docker:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(npm run build:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": [],

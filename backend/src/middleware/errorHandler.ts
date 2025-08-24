@@ -133,3 +133,24 @@ export const wrapAsync = (fn: Function) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };
+
+/**
+ * Custom error classes for specific error types
+ */
+export class UnauthorizedError extends ApiError {
+  constructor(message: string = 'Unauthorized', details?: any) {
+    super(ErrorCode.UNAUTHORIZED, message, 401, details);
+  }
+}
+
+export class ForbiddenError extends ApiError {
+  constructor(message: string = 'Forbidden', details?: any) {
+    super(ErrorCode.FORBIDDEN, message, 403, details);
+  }
+}
+
+export class UploadError extends ApiError {
+  constructor(message: string = 'Upload error', details?: any) {
+    super(ErrorCode.UPLOAD_ERROR, message, 400, details);
+  }
+}

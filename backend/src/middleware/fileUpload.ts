@@ -6,7 +6,7 @@ import { uploadConfig } from '../config/environment';
 import logger from '../utils/logger';
 
 // File validation middleware
-export const validateImageFile = (req: Request, res: Response, next: NextFunction) => {
+export const validateImageFile = (req: Request, _res: Response, next: NextFunction) => {
   if (!req.file) {
     return next(new UploadError('No file uploaded'));
   }
@@ -62,7 +62,7 @@ export const validateImageFile = (req: Request, res: Response, next: NextFunctio
 // Multiple files validation middleware
 export const validateMultipleImageFiles = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ) => {
   const files = req.files as Express.Multer.File[];
@@ -126,7 +126,7 @@ export const validateMultipleImageFiles = (
 };
 
 // Cleanup middleware for error cases
-export const cleanupFiles = (error: Error, req: Request, res: Response, next: NextFunction) => {
+export const cleanupFiles = (error: Error, req: Request, _res: Response, next: NextFunction) => {
   // Clean up uploaded files if there's an error
   if (error) {
     if (req.file && fs.existsSync(req.file.path)) {

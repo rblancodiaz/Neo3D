@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { Hotel, Floor, Room, RoomFormData } from '../types/hotel';
+import type { Hotel, Floor, Room, RoomFormData } from '../types';
 import { hotelApi } from '../services/api';
 
 interface HotelStore {
