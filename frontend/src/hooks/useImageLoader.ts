@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { imageApi } from '../services/api';
 
 interface UseImageLoaderOptions {
   url?: string;
@@ -103,6 +102,15 @@ export const useImageLoader = ({
 
   const loadFile = useCallback(
     async (file: File) => {
+      console.log('🔥 USEIMAGELOADER: loadFile called with:', {
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+        validateDimensions,
+        minWidth,
+        minHeight
+      });
+      
       setState((prev) => ({
         ...prev,
         isLoading: true,
@@ -110,22 +118,50 @@ export const useImageLoader = ({
       }));
 
       try {
-        // Validate file
-        const isValid = await imageApi.validateImage(file);
-        if (!isValid) {
-          throw new Error(
-            'Invalid image file. Please upload a JPG or PNG image (max 10MB, min 800x600px)'
-          );
-        }
-
-        // Get dimensions
-        const dimensions = await imageApi.getImageDimensions(file);
-
-        // Create object URL and load image
+        // Create object URL and load image once
         const url = URL.createObjectURL(file);
+        console.log('🔥 USEIMAGELOADER: Created object URL:', url);
         
         const img = new Image();
         img.onload = () => {
+          console.log('🔥 USEIMAGELOADER: Image loaded successfully:', {
+            width: img.width,
+            height: img.height,
+            naturalWidth: img.naturalWidth,
+            naturalHeight: img.naturalHeight
+          });
+          
+          // Validate dimensions after loading
+          const dimensions = { width: img.width, height: img.height };
+          const isValidSize = !validateDimensions || (img.width >= minWidth && img.height >= minHeight);
+          
+          console.log('🔥 USEIMAGELOADER: Dimension validation:', {
+            dimensions,
+            isValidSize,
+            validateDimensions,
+            minWidth,
+            minHeight
+          });
+          
+          if (!isValidSize) {
+            const error = new Error(
+              `Image dimensions must be at least ${minWidth}x${minHeight}px. Current: ${img.width}x${img.height}px`
+            );
+            console.log('🔥 USEIMAGELOADER: Dimension validation failed, calling onError');
+            setState({
+              image: null,
+              isLoading: false,
+              error,
+              dimensions: null,
+              aspectRatio: null,
+            });
+            onError?.(error);
+            URL.revokeObjectURL(url);
+            return;
+          }
+          
+          // Image is valid, update state and trigger callback
+          console.log('🔥 USEIMAGELOADER: Image validation passed, updating state and calling onLoad');
           setState({
             image: img,
             isLoading: false,
@@ -133,24 +169,31 @@ export const useImageLoader = ({
             dimensions,
             aspectRatio: dimensions.width / dimensions.height,
           });
+          
+          console.log('🔥 USEIMAGELOADER: About to call onLoad callback');
           onLoad?.(img);
+          console.log('🔥 USEIMAGELOADER: onLoad callback completed');
+          URL.revokeObjectURL(url); // Clean up
         };
 
-        img.onerror = () => {
-          const error = new Error('Failed to load image file');
+        img.onerror = (error) => {
+          console.error('🔥 USEIMAGELOADER: Image loading error:', error);
+          const err = new Error('Failed to load image file');
           setState({
             image: null,
             isLoading: false,
-            error,
+            error: err,
             dimensions: null,
             aspectRatio: null,
           });
-          onError?.(error);
+          onError?.(err);
           URL.revokeObjectURL(url);
         };
 
+        console.log('🔥 USEIMAGELOADER: Setting image src to object URL');
         img.src = url;
       } catch (error) {
+        console.error('🔥 USEIMAGELOADER: Exception in loadFile:', error);
         const err = error instanceof Error ? error : new Error('Failed to load image file');
         setState({
           image: null,
@@ -162,7 +205,7 @@ export const useImageLoader = ({
         onError?.(err);
       }
     },
-    [onLoad, onError]
+    [onLoad, onError, validateDimensions, minWidth, minHeight]
   );
 
   const reset = useCallback(() => {

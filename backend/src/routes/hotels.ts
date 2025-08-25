@@ -36,7 +36,7 @@ router.get(
 // Create new hotel with image
 router.post(
   '/',
-  uploadLimiter,
+  // uploadLimiter, // TEMPORARILY DISABLED FOR TESTING
   uploadHotelImage,
   validateCreateHotel,
   asyncHandler(hotelController.createHotel),

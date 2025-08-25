@@ -36,7 +36,7 @@ const startServer = async () => {
     // Start server
     const PORT = config.PORT || 3001;
     
-    const server = app.listen(PORT, () => {
+    app.listen(PORT, () => {
       logInfo(`Server is running on port ${PORT}`, {
         environment: config.NODE_ENV,
         url: `${config.APP_URL}`,

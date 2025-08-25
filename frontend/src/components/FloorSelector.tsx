@@ -11,7 +11,7 @@ export const FloorSelector: React.FC = () => {
     
     const floorNumber = (currentHotel.floors?.length || 0) + 1;
     const newFloor = await createFloor(currentHotel.id, {
-      number: floorNumber,
+      floorNumber: floorNumber,
       name: `Floor ${floorNumber}`,
     });
     

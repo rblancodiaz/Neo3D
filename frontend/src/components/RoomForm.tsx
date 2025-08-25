@@ -54,7 +54,7 @@ export const RoomForm: React.FC<RoomFormProps> = ({
       if (room) {
         await updateRoom(room.id, data);
       } else if (currentFloor && coordinates) {
-        await createRoom(currentFloor.id, { ...data, coordinates });
+        await createRoom(currentFloor.id, data, coordinates);
       }
       onSubmit(data);
       onClose();

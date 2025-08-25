@@ -92,8 +92,18 @@ export const paths = {
 
 // Database URL parser for Sequelize
 export const parseDbUrl = (url: string) => {
+  // Handle SQLite URLs
+  if (url.startsWith('sqlite:')) {
+    return {
+      dialect: 'sqlite' as const,
+      storage: url.replace('sqlite:', ''),
+    };
+  }
+  
+  // Handle PostgreSQL URLs
   const dbUrl = new URL(url);
   return {
+    dialect: 'postgres' as const,
     host: dbUrl.hostname,
     port: parseInt(dbUrl.port || '5432'),
     username: dbUrl.username,
@@ -105,9 +115,8 @@ export const parseDbUrl = (url: string) => {
 // Export parsed database config
 export const dbConfig = {
   ...parseDbUrl(config.DATABASE_URL),
-  dialect: 'postgres' as const,
   logging: isDevelopment ? console.log : false,
-  pool: {
+  pool: config.DATABASE_URL.startsWith('sqlite:') ? undefined : {
     min: config.DB_POOL_MIN,
     max: config.DB_POOL_MAX,
     acquire: config.DB_POOL_ACQUIRE,

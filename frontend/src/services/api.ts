@@ -3,8 +3,8 @@ import type { Hotel, Floor, Room, RoomFormData, NormalizedCoordinates, ApiRespon
 
 // Create axios instance with base configuration
 const apiClient: AxiosInstance = axios.create({
-  baseURL: '/api',
-  timeout: 30000,
+  baseURL: 'http://localhost:3001/api',  // Direct backend URL for now
+  timeout: 60000,  // Increased timeout to 60 seconds for large files
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,6 +13,20 @@ const apiClient: AxiosInstance = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
+    console.log('🚀 AXIOS REQUEST: Outgoing request details:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      headers: {
+        'Content-Type': config.headers['Content-Type'],
+        Authorization: !!config.headers.Authorization,
+      },
+      hasData: !!config.data,
+      dataType: config.data instanceof FormData ? 'FormData' : typeof config.data,
+      timestamp: new Date().toISOString(),
+    });
+    
     // Add auth token if available
     const token = localStorage.getItem('authToken');
     if (token) {
@@ -21,14 +35,54 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('🚀 AXIOS REQUEST ERROR:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('🌐 AXIOS RESPONSE: Incoming response details:', {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.config.url,
+      method: response.config.method?.toUpperCase(),
+      headers: {
+        'content-type': response.headers['content-type'],
+        'content-length': response.headers['content-length'],
+      },
+      dataType: typeof response.data,
+      hasData: !!response.data,
+      timestamp: new Date().toISOString(),
+    });
+    
+    // Log full response data for debugging
+    if (response.data) {
+      console.log('🌐 AXIOS RESPONSE: Response body structure:', {
+        success: response.data.success,
+        error: response.data.error,
+        message: response.data.message,
+        hasNestedData: !!response.data.data,
+        nestedDataType: typeof response.data.data,
+        nestedDataKeys: response.data.data ? Object.keys(response.data.data) : null,
+      });
+      console.log('🌐 AXIOS RESPONSE: Full response.data:', JSON.stringify(response.data, null, 2));
+    }
+    
+    return response;
+  },
   (error) => {
+    console.error('🌐 AXIOS ERROR: Response error intercepted:', {
+      message: error.message,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      url: error.config?.url,
+      method: error.config?.method?.toUpperCase(),
+      responseData: error.response?.data,
+      timestamp: new Date().toISOString(),
+    });
+    
     if (error.response?.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('authToken');
@@ -48,16 +102,54 @@ export const hotelApi = {
     apiClient.get<ApiResponse<Hotel>>(`/hotels/${id}`),
   
   createHotel: (data: FormData) => {
-    console.log('API: Creating hotel with FormData');
+    console.log('🌐 API CALL: Starting hotel creation request...');
+    console.log('🌐 API CALL: FormData contents:', {
+      hasName: data.has('name'),
+      hasImage: data.has('image'),
+      nameValue: data.get('name'),
+      imageFileName: (data.get('image') as File)?.name || 'no file',
+    });
+    
     return apiClient.post<ApiResponse<Hotel>>('/hotels', data, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     }).then(response => {
-      console.log('API: Hotel creation response:', response);
+      console.log('🌐 API RESPONSE: Raw hotel creation response received');
+      console.log('🌐 API RESPONSE: Response status:', response.status);
+      console.log('🌐 API RESPONSE: Response headers:', response.headers);
+      console.log('🌐 API RESPONSE: Response data structure:', {
+        dataType: typeof response.data,
+        hasData: !!response.data,
+        dataKeys: response.data ? Object.keys(response.data) : 'no data',
+      });
+      console.log('🌐 API RESPONSE: Full response.data:', JSON.stringify(response.data, null, 2));
+      
+      // Detailed analysis of nested structure
+      if (response.data) {
+        console.log('🌐 API RESPONSE: Analyzing response.data structure:');
+        console.log('  - success:', response.data.success);
+        console.log('  - error:', response.data.error);
+        console.log('  - message:', response.data.message);
+        console.log('  - data field type:', typeof response.data.data);
+        console.log('  - data field keys:', response.data.data ? Object.keys(response.data.data) : 'no nested data');
+        
+        if (response.data.data) {
+          console.log('🌐 API RESPONSE: Analyzing nested response.data.data:');
+          console.log('  - nested data type:', typeof response.data.data);
+          console.log('  - nested data keys:', Object.keys(response.data.data));
+          console.log('  - nested data:', JSON.stringify(response.data.data, null, 2));
+        }
+      }
+      
       return response;
     }).catch(error => {
-      console.error('API: Hotel creation error:', error.response || error);
+      console.error('🌐 API ERROR: Hotel creation failed');
+      console.error('🌐 API ERROR: Error object:', error);
+      console.error('🌐 API ERROR: Error message:', error.message);
+      console.error('🌐 API ERROR: Error response:', error.response?.data);
+      console.error('🌐 API ERROR: Error status:', error.response?.status);
+      console.error('🌐 API ERROR: Error headers:', error.response?.headers);
       throw error;
     });
   },
@@ -132,22 +224,36 @@ export const imageApi = {
       }
       
       const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      
       img.onload = () => {
-        resolve(img.width >= 800 && img.height >= 600);
+        const isValid = img.width >= 800 && img.height >= 600;
+        URL.revokeObjectURL(objectUrl); // Clean up
+        resolve(isValid);
       };
-      img.onerror = () => resolve(false);
-      img.src = URL.createObjectURL(file);
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl); // Clean up
+        resolve(false);
+      };
+      img.src = objectUrl;
     });
   },
   
   getImageDimensions: (file: File): Promise<{ width: number; height: number }> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      
       img.onload = () => {
-        resolve({ width: img.width, height: img.height });
+        const dimensions = { width: img.width, height: img.height };
+        URL.revokeObjectURL(objectUrl); // Clean up
+        resolve(dimensions);
       };
-      img.onerror = reject;
-      img.src = URL.createObjectURL(file);
+      img.onerror = (error) => {
+        URL.revokeObjectURL(objectUrl); // Clean up
+        reject(error);
+      };
+      img.src = objectUrl;
     });
   },
   

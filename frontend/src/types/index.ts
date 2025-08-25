@@ -40,8 +40,13 @@ export interface Hotel {
 export interface Floor {
   id: string;
   hotelId: string;
-  number: number;
+  floorNumber: number;
   name: string;
+  displayOrder?: number;
+  floorAreaSqm?: number;
+  status?: 'active' | 'inactive' | 'maintenance';
+  totalRooms?: number;
+  notes?: string;
   rooms: Room[];
   createdAt: string;
   updatedAt: string;

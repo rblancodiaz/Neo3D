@@ -17,12 +17,24 @@
       "Bash(npm run build:*)",
       "Bash(psql:*)",
       "Bash(start http://localhost:5173)",
-      "Bash(start D:devprojectsNeo3Dtest-upload.html)"
+      "Bash(start D:devprojectsNeo3Dtest-upload.html)",
+      "Bash(start chrome http://localhost:5173)",
+      "Bash(start chrome \"file://D:/devprojects/Neo3D/test-upload.html\")",
+      "Bash(start \"file://D:/devprojects/Neo3D/test-upload.html\")",
+      "Bash(npm run lint)",
+      "Bash(npm ls:*)",
+      "Bash(taskkill:*)",
+      "Bash(node:*)",
+      "Bash(npm start)",
+      "Bash(start \"file://D:/devprojects/Neo3D/test-image-creator.html\")",
+      "Bash(sqlite3:*)",
+      "Bash(start chrome http://localhost:5177)"
     ],
     "deny": [],
     "ask": [],
     "additionalDirectories": [
-      "D:\\d\\devprojects\\Neo3D"
+      "D:\\d\\devprojects\\Neo3D",
+      "D:\\"
     ]
   }
 }

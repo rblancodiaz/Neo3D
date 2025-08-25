@@ -3,161 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Upload Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-        }
-        .upload-area {
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-        .upload-area:hover {
-            background-color: #f5f5f5;
-        }
-        .preview {
-            max-width: 400px;
-            margin: 20px auto;
-        }
-        .preview img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 8px;
-        }
-        .error {
-            color: red;
-        }
-        .success {
-            color: green;
-        }
-        pre {
-            background: #333;
-            color: #fff;
-            padding: 10px;
-            border-radius: 4px;
-            overflow-x: auto;
-        }
-    </style>
+    <title>Debug Upload Test</title>
 </head>
 <body>
-    <h1>Hotel Image Upload Test</h1>
-    
-    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
-        <p>Click here or drag an image to upload</p>
-        <input type="file" id="fileInput" accept="image/*" style="display: none">
-    </div>
-    
-    <div id="preview" class="preview"></div>
-    <div id="result" class="result" style="display: none;"></div>
+    <h1>Upload Debug Test</h1>
+    <p>Open this file and then navigate to: <a href="http://localhost:5176" target="_blank">http://localhost:5176</a></p>
     
     <script>
-        const fileInput = document.getElementById('fileInput');
-        const preview = document.getElementById('preview');
-        const result = document.getElementById('result');
+        console.log('🔥 TEST: Debug page loaded. Now:');
+        console.log('1. Open the React app in another tab');
+        console.log('2. Try to upload a file');
+        console.log('3. Check the console for 🔥 IMAGEUPLOADER logs');
+        console.log('4. If no logs appear, the file input is not triggering');
         
-        fileInput.addEventListener('change', handleFileSelect);
-        
-        // Drag and drop
-        document.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-        
-        document.querySelector('.upload-area').addEventListener('drop', (e) => {
-            e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                handleFile(files[0]);
-            }
-        });
-        
-        function handleFileSelect(e) {
-            const file = e.target.files[0];
-            if (file) {
-                handleFile(file);
-            }
-        }
-        
-        function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                showResult('Please select an image file', 'error');
-                return;
-            }
-            
-            // Show preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-            };
-            reader.readAsDataURL(file);
-            
-            // Upload file
-            uploadFile(file);
-        }
-        
-        async function uploadFile(file) {
-            const formData = new FormData();
-            formData.append('name', `Test Hotel ${Date.now()}`);
-            formData.append('image', file);
-            
-            result.style.display = 'block';
-            result.innerHTML = '<p>Uploading...</p>';
-            
-            try {
-                console.log('Sending request to backend...');
-                const response = await fetch('http://localhost:3001/api/hotels', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const data = await response.json();
-                console.log('Response:', data);
-                
-                if (response.ok) {
-                    showResult('Upload successful!', 'success');
-                    
-                    // Display the response
-                    result.innerHTML += `
-                        <p class="success">✓ Hotel created successfully!</p>
-                        <h3>Response Data:</h3>
-                        <pre>${JSON.stringify(data, null, 2)}</pre>
-                    `;
-                    
-                    // Check if we can load the image
-                    if (data.data?.hotel?.processedImageUrl) {
-                        const imgUrl = `http://localhost:3001${data.data.hotel.processedImageUrl}`;
-                        result.innerHTML += `
-                            <h3>Processed Image:</h3>
-                            <img src="${imgUrl}" style="max-width: 400px; border: 2px solid green;">
-                            <p>Image URL: ${imgUrl}</p>
-                        `;
-                    }
-                } else {
-                    showResult(`Upload failed: ${data.error?.message || 'Unknown error'}`, 'error');
-                    result.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                showResult(`Error: ${error.message}`, 'error');
-            }
-        }
-        
-        function showResult(message, type) {
-            result.style.display = 'block';
-            result.innerHTML = `<p class="${type}">${message}</p>`;
-        }
+        // Instructions for manual testing
+        setTimeout(() => {
+            console.log('🔥 TEST: If you see this but no IMAGEUPLOADER logs when selecting a file, the problem is in the React component event binding');
+        }, 5000);
     </script>
 </body>
 </html>

@@ -107,8 +107,9 @@ class ImageService {
       const processedPath = path.join(paths.processed, processedFileName);
       const thumbnailPath = path.join(paths.thumbnails, thumbnailFileName);
 
-      // Move original file
-      await fs.rename(file.path, originalPath);
+      // Copy original file (rename doesn't work across Docker volumes)
+      await fs.copyFile(file.path, originalPath);
+      await fs.unlink(file.path);
 
       // Process main image (resize if needed, optimize)
       await this.createProcessedImage(originalPath, processedPath, metadata);

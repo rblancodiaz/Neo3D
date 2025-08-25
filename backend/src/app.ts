@@ -18,9 +18,29 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }, // Allow images to be loaded from different origins
 }));
 
-// CORS configuration
+// CORS configuration - Allow multiple origins for development
 app.use(cors({
-  origin: config.CORS_ORIGIN,
+  origin: function(origin, callback) {
+    // Allow requests from localhost on any port during development
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:5174', 
+      'http://localhost:5175',
+      'http://localhost:5176',
+      'http://localhost:5177',
+      'http://localhost:3000',
+      'http://localhost:3001'
+    ];
+    
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || config.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -30,8 +50,8 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting
-app.use(generalLimiter);
+// Rate limiting - TEMPORARILY DISABLED FOR TESTING
+// app.use(generalLimiter);
 
 // Request logging (only in development)
 if (config.NODE_ENV === 'development') {

@@ -2,11 +2,11 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useMapperStore } from '../stores/mapperStore';
 import { useHotelStore } from '../stores/hotelStore';
 import { DrawingTool } from '../types';
-import type { Point, PixelCoordinates, NormalizedCoordinates } from '../types';
+import type { Point } from '../types';
 import { normalizeCoordinates, denormalizeCoordinates } from '../utils/coordinates';
 
 interface UseCanvasDrawingOptions {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
+  canvasRef: { current: HTMLCanvasElement | null };
   imageUrl?: string;
 }
 
@@ -88,26 +88,6 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
     [viewportState]
   );
 
-  // Convert image coordinates to canvas coordinates
-  const imageToCanvas = useCallback(
-    (point: Point): Point => {
-      return {
-        x: point.x * viewportState.scale + viewportState.offsetX,
-        y: point.y * viewportState.scale + viewportState.offsetY,
-      };
-    },
-    [viewportState]
-  );
-
-  // Check if point is inside rectangle
-  const isPointInRect = (point: Point, rect: PixelCoordinates): boolean => {
-    return (
-      point.x >= rect.x &&
-      point.x <= rect.x + rect.width &&
-      point.y >= rect.y &&
-      point.y <= rect.y + rect.height
-    );
-  };
 
   // Find room at position
   const getRoomAtPosition = useCallback(
@@ -346,7 +326,7 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
   );
 
   const handleMouseUp = useCallback(
-    (e: MouseEvent) => {
+    (_e: MouseEvent) => {
       if (drawingState.isDrawing && currentTool === DrawingTool.RECTANGLE) {
         endDrawing();
         

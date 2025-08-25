@@ -248,7 +248,7 @@ export const useMapperStore = create<MapperStore>()(
 
       // History actions
       undo: () => {
-        const { history, historyIndex } = get();
+        const { historyIndex } = get();
         if (historyIndex > 0) {
           set({ historyIndex: historyIndex - 1 });
           // Apply undo action

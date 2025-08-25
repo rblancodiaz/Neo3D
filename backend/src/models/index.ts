@@ -51,9 +51,16 @@ export const initDatabase = async (): Promise<void> => {
     await sequelize.authenticate();
     console.log('Database connection established successfully.');
 
-    // Don't sync models since tables already exist
-    // Models will validate against existing schema
-    console.log('Using existing database schema.');
+    // Check if we're using SQLite and sync models if needed
+    const dialect = sequelize.getDialect();
+    if (dialect === 'sqlite') {
+      console.log('SQLite detected - creating tables if not exist...');
+      await sequelize.sync({ force: false });
+      console.log('Database schema synchronized for SQLite.');
+    } else {
+      // Don't sync models for PostgreSQL since tables already exist
+      console.log('Using existing database schema.');
+    }
   } catch (error) {
     console.error('Unable to connect to the database:', error);
     throw error;

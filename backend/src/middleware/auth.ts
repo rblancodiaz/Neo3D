@@ -131,7 +131,7 @@ export const generateToken = (payload: {
   role?: string;
 }): string => {
   const options: jwt.SignOptions = {
-    expiresIn: config.JWT_EXPIRES_IN,
+    expiresIn: config.JWT_EXPIRES_IN as any,
   };
   return jwt.sign(payload, config.JWT_SECRET || 'default-secret', options);
 };

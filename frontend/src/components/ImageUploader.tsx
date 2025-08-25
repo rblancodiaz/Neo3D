@@ -3,8 +3,25 @@ import { Upload, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
 import { useImageLoader } from '../hooks/useImageLoader';
 import { clsx } from 'clsx';
 
+// Debug test function to bypass all validation
+const testDirectCallback = (onImageSelect: (file: File) => void, file: File) => {
+  console.log('🔥 IMAGEUPLOADER: testDirectCallback called with:', {
+    fileName: file.name,
+    fileType: file.type,
+    fileSize: file.size,
+    onImageSelectType: typeof onImageSelect
+  });
+  
+  try {
+    onImageSelect(file);
+    console.log('🔥 IMAGEUPLOADER: testDirectCallback - onImageSelect completed successfully');
+  } catch (error) {
+    console.error('🔥 IMAGEUPLOADER: testDirectCallback - onImageSelect threw error:', error);
+  }
+};
+
 interface ImageUploaderProps {
-  onImageSelect: (file: File, preview: string) => void;
+  onImageSelect: (file: File) => void;
   onError?: (error: string) => void;
   className?: string;
   accept?: string;
@@ -21,43 +38,96 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const { loadFile, isLoading, error, dimensions, aspectRatio, reset } = useImageLoader({
     onLoad: (image) => {
+      console.log('🔥 IMAGEUPLOADER: useImageLoader onLoad callback called:', {
+        imageWidth: image.width,
+        imageHeight: image.height,
+        hasSelectedFile: !!selectedFile,
+        selectedFileName: selectedFile?.name || 'null'
+      });
+      
       // Image loaded successfully
-      if (fileName) {
-        const file = new File([preview!], fileName, { type: 'image/jpeg' });
-        onImageSelect(file, preview!);
+      if (selectedFile) {
+        console.log('🔥 IMAGEUPLOADER: Calling onImageSelect with file:', selectedFile.name);
+        onImageSelect(selectedFile);
+        console.log('🔥 IMAGEUPLOADER: onImageSelect callback completed');
+      } else {
+        console.error('🔥 IMAGEUPLOADER: selectedFile is null in onLoad callback!');
       }
     },
     onError: (err) => {
+      console.error('🔥 IMAGEUPLOADER: useImageLoader onError callback:', {
+        errorMessage: err.message,
+        errorType: typeof err,
+        errorStack: err.stack
+      });
       onError?.(err.message);
     },
+    validateDimensions: false // TEMPORARILY DISABLE dimension validation to test
   });
 
   const handleFile = useCallback(
     async (file: File) => {
+      console.log('🔥 IMAGEUPLOADER: handleFile called with:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        timestamp: new Date().toISOString()
+      });
+      
       // Basic validation
       if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+        console.log('🔥 IMAGEUPLOADER: File type validation failed:', file.type);
         onError?.('Please upload a JPG or PNG image');
         return;
       }
 
       if (file.size > maxSize * 1024 * 1024) {
+        console.log('🔥 IMAGEUPLOADER: File size validation failed:', {
+          fileSize: file.size,
+          maxSizeBytes: maxSize * 1024 * 1024
+        });
         onError?.(`File size must be less than ${maxSize}MB`);
         return;
       }
+
+      console.log('🔥 IMAGEUPLOADER: Basic validation passed, storing file and creating preview');
+      
+      // TEMPORARY DEBUG: Test direct callback immediately
+      console.log('🔥 IMAGEUPLOADER: Testing direct callback bypass...');
+      testDirectCallback(onImageSelect, file);
+      
+      // Store the file for later use
+      setSelectedFile(file);
 
       // Create preview
       const reader = new FileReader();
       reader.onload = async (e) => {
         const result = e.target?.result as string;
+        console.log('🔥 IMAGEUPLOADER: FileReader loaded, setting preview');
         setPreview(result);
         setFileName(file.name);
         
-        // Load and validate image
-        await loadFile(file);
+        try {
+          console.log('🔥 IMAGEUPLOADER: Starting loadFile for image validation');
+          // Load and validate image
+          await loadFile(file);
+          console.log('🔥 IMAGEUPLOADER: loadFile completed successfully');
+        } catch (error) {
+          console.error('🔥 IMAGEUPLOADER: Failed to load image:', error);
+          onError?.('Failed to process image file');
+        }
       };
+      
+      reader.onerror = (error) => {
+        console.error('🔥 IMAGEUPLOADER: FileReader error:', error);
+        onError?.('Failed to read image file');
+      };
+      
+      console.log('🔥 IMAGEUPLOADER: Starting FileReader.readAsDataURL');
       reader.readAsDataURL(file);
     },
     [maxSize, onError, loadFile]
@@ -67,9 +137,16 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragging(false);
-
+      
+      console.log('🔥 IMAGEUPLOADER: handleDrop triggered');
       const files = Array.from(e.dataTransfer.files);
+      console.log('🔥 IMAGEUPLOADER: Dropped files:', {
+        filesCount: files.length,
+        firstFileName: files[0]?.name || 'none'
+      });
+
       if (files.length > 0) {
+        console.log('🔥 IMAGEUPLOADER: Calling handleFile with dropped file:', files[0].name);
         handleFile(files[0]);
       }
     },
@@ -88,9 +165,18 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      console.log('🔥 IMAGEUPLOADER: handleFileInput triggered');
       const files = e.target.files;
+      console.log('🔥 IMAGEUPLOADER: Files from input:', {
+        filesCount: files?.length || 0,
+        firstFileName: files?.[0]?.name || 'none'
+      });
+      
       if (files && files.length > 0) {
+        console.log('🔥 IMAGEUPLOADER: Calling handleFile with:', files[0].name);
         handleFile(files[0]);
+      } else {
+        console.log('🔥 IMAGEUPLOADER: No files selected');
       }
     },
     [handleFile]
@@ -99,6 +185,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const handleRemove = useCallback(() => {
     setPreview(null);
     setFileName(null);
+    setSelectedFile(null);
     reset();
   }, [reset]);
 

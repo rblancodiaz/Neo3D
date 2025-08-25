@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Test Image</title>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600" style="border: 1px solid black;"></canvas>
+    <br>
+    <button onclick="downloadImage()">Download Test Image</button>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Create a simple hotel layout
+        ctx.fillStyle = '#f0f0f0';
+        ctx.fillRect(0, 0, 800, 600);
+        
+        // Draw building outline
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(50, 50, 700, 500);
+        
+        // Add some text
+        ctx.fillStyle = '#333';
+        ctx.font = '24px Arial';
+        ctx.fillText('Test Hotel Image', 300, 100);
+        ctx.font = '16px Arial';
+        ctx.fillText('800x600 PNG for testing', 300, 130);
+        
+        // Draw some room-like rectangles
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j < 3; j++) {
+                ctx.strokeRect(100 + i * 120, 200 + j * 80, 100, 60);
+            }
+        }
+        
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'test-hotel-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>
