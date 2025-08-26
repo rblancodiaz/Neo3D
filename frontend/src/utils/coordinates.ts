@@ -24,6 +24,9 @@ export const denormalizeCoordinates = (
   imageWidth: number,
   imageHeight: number
 ): PixelCoordinates => {
+  if (!normalizedCoords) {
+    return { x: 0, y: 0, width: 0, height: 0 };
+  }
   return {
     x: normalizedCoords.x * imageWidth,
     y: normalizedCoords.y * imageHeight,

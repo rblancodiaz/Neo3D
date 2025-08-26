@@ -28,7 +28,8 @@
       "Bash(npm start)",
       "Bash(start \"file://D:/devprojects/Neo3D/test-image-creator.html\")",
       "Bash(sqlite3:*)",
-      "Bash(start chrome http://localhost:5177)"
+      "Bash(start chrome http://localhost:5177)",
+      "Bash(start chrome http://localhost:5174)"
     ],
     "deny": [],
     "ask": [],

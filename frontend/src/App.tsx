@@ -11,7 +11,6 @@ import { useHotelStore } from './stores/hotelStore';
 import { useUIStore } from './stores/uiStore';
 import { Hotel as HotelIcon, Menu } from 'lucide-react';
 import { clsx } from 'clsx';
-import { testValidation } from './test-validation';
 import type { Room } from './types';
 
 function App() {
@@ -218,14 +217,12 @@ function App() {
     };
 
     (window as any).testDirectUpload = testDirectUpload;
-    (window as any).testValidation = testValidation;
 
     console.log('🔥 DEBUG: Debug functions exposed:');
     console.log('  - window.debugHotelUpload(): Create synthetic image and test upload');
     console.log('  - window.debugCurrentState(): Check current app state');
     console.log('  - window.testDirectUpload(file): Test upload with provided file');
-    console.log('  - window.testValidation(): Test image validation logic');
-  }, [currentHotel, currentFloor, hotels, handleImageUpload, testDirectUpload, testValidation]);
+  }, [currentHotel, currentFloor, hotels, handleImageUpload, testDirectUpload]);
 
   return (
     <div className="flex h-screen bg-gray-50">

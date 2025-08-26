@@ -518,13 +518,33 @@ export const useHotelStore = create<HotelStore>()(
       createRoom: async (floorId, data, coordinates) => {
         set({ isSavingRoom: true, error: null });
         try {
+          console.log('🔥 HOTELSTORE: Creating room with coordinates:', { 
+            floorId, 
+            data, 
+            coordinates,
+            hasCoordinates: !!coordinates 
+          });
+          
           const roomData = { ...data, coordinates };
           const response = await hotelApi.createRoom(floorId, roomData);
           // The API returns { success: true, data: { room: Room } }
-          const newRoom = (response.data as any).data;
+          const newRoom = (response.data as any).data.room;
+          
+          console.log('🔥 HOTELSTORE: Room created, response:', { 
+            hasRoom: !!newRoom, 
+            roomId: newRoom?.id,
+            roomCoordinates: newRoom?.coordinates,
+            hasCoordinates: !!newRoom?.coordinates
+          });
+          
           if (!newRoom) {
             throw new Error('No room data received');
           }
+          
+          if (!newRoom.coordinates) {
+            console.warn('⚠️ HOTELSTORE: Room saved without coordinates!');
+          }
+          
           set((state) => ({
             rooms: [...state.rooms, newRoom],
             isSavingRoom: false,
@@ -544,7 +564,7 @@ export const useHotelStore = create<HotelStore>()(
         try {
           const response = await hotelApi.updateRoom(id, data);
           // The API returns { success: true, data: { room: Room } }
-          const updatedRoom = (response.data as any).data;
+          const updatedRoom = (response.data as any).data.room;
           if (!updatedRoom) {
             throw new Error('No updated room data received');
           }

@@ -102,6 +102,8 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
       
       for (const room of rooms) {
         const coords = room.coordinates;
+        if (!coords) continue; // Skip rooms without coordinates
+        
         if (
           normalizedPoint.x >= coords.x &&
           normalizedPoint.x <= coords.x + coords.width &&
@@ -161,34 +163,55 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
       
       // Draw existing rooms
       rooms.forEach((room) => {
+        if (!room.coordinates) return;
+        
         const pixelCoords = denormalizeCoordinates(
           room.coordinates,
           image.width,
           image.height
         );
         
-        // Set styles based on state
+        // Save context for shadow effects
+        ctx.save();
+        
+        // Set styles based on state with improved visual feedback
         if (room.id === drawingState.selectedRoomId) {
-          ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
-          ctx.strokeStyle = '#3b82f6';
-          ctx.lineWidth = 2 / viewportState.scale;
+          // Selected room - vibrant blue with glow effect
+          ctx.shadowColor = 'rgba(59, 130, 246, 0.5)';
+          ctx.shadowBlur = 10 / viewportState.scale;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.fillStyle = 'rgba(59, 130, 246, 0.4)';
+          ctx.strokeStyle = '#2563eb';
+          ctx.lineWidth = 3 / viewportState.scale;
         } else if (room.id === drawingState.hoveredRoomId) {
-          ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
-          ctx.strokeStyle = '#60a5fa';
-          ctx.lineWidth = 2 / viewportState.scale;
+          // Hovered room - lighter blue with subtle glow
+          ctx.shadowColor = 'rgba(96, 165, 250, 0.4)';
+          ctx.shadowBlur = 8 / viewportState.scale;
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.fillStyle = 'rgba(96, 165, 250, 0.3)';
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 2.5 / viewportState.scale;
+          // Set cursor to pointer when hovering (will be handled in canvas style)
         } else {
-          ctx.fillStyle = 'rgba(59, 130, 246, 0.1)';
-          ctx.strokeStyle = '#93c5fd';
-          ctx.lineWidth = 1 / viewportState.scale;
+          // Normal room - subtle presence
+          ctx.fillStyle = 'rgba(147, 197, 253, 0.15)';
+          ctx.strokeStyle = '#60a5fa';
+          ctx.lineWidth = 1.5 / viewportState.scale;
         }
         
-        // Draw rectangle
+        // Draw rectangle with rounded corners effect
         ctx.fillRect(
           pixelCoords.x,
           pixelCoords.y,
           pixelCoords.width,
           pixelCoords.height
         );
+        
+        // Draw stroke without shadow for cleaner edges
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
         ctx.strokeRect(
           pixelCoords.x,
           pixelCoords.y,
@@ -196,9 +219,28 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
           pixelCoords.height
         );
         
-        // Draw room number
-        ctx.fillStyle = '#1e40af';
-        ctx.font = `${14 / viewportState.scale}px Arial`;
+        // Restore context
+        ctx.restore();
+        
+        // Draw room number with better visibility
+        const isHighlighted = room.id === drawingState.selectedRoomId || room.id === drawingState.hoveredRoomId;
+        
+        // Add semi-transparent background for text
+        if (isHighlighted) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          const textPadding = 8 / viewportState.scale;
+          const textWidth = ctx.measureText(room.roomNumber).width;
+          ctx.fillRect(
+            pixelCoords.x + pixelCoords.width / 2 - textWidth / 2 - textPadding,
+            pixelCoords.y + pixelCoords.height / 2 - 10 / viewportState.scale,
+            textWidth + textPadding * 2,
+            20 / viewportState.scale
+          );
+        }
+        
+        // Draw room number text
+        ctx.fillStyle = isHighlighted ? '#1e40af' : '#3b82f6';
+        ctx.font = `bold ${(isHighlighted ? 16 : 14) / viewportState.scale}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(
@@ -208,7 +250,7 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
         );
       });
       
-      // Draw current drawing rectangle
+      // Draw current drawing rectangle with improved visuals
       if (drawingState.currentRect && image) {
         const imageRect = canvasToImage({
           x: drawingState.currentRect.x,
@@ -219,10 +261,19 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
           y: drawingState.currentRect.y + drawingState.currentRect.height,
         });
         
-        ctx.fillStyle = 'rgba(34, 197, 94, 0.2)';
-        ctx.strokeStyle = '#22c55e';
-        ctx.lineWidth = 2 / viewportState.scale;
-        ctx.setLineDash([5 / viewportState.scale, 5 / viewportState.scale]);
+        // Save context for drawing effects
+        ctx.save();
+        
+        // Add glow effect for drawing rectangle
+        ctx.shadowColor = 'rgba(34, 197, 94, 0.6)';
+        ctx.shadowBlur = 10 / viewportState.scale;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        ctx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+        ctx.strokeStyle = '#16a34a';
+        ctx.lineWidth = 2.5 / viewportState.scale;
+        ctx.setLineDash([8 / viewportState.scale, 4 / viewportState.scale]);
         
         ctx.fillRect(
           imageRect.x,
@@ -230,6 +281,10 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
           imageEndPoint.x - imageRect.x,
           imageEndPoint.y - imageRect.y
         );
+        
+        // Draw stroke without shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
         ctx.strokeRect(
           imageRect.x,
           imageRect.y,
@@ -237,6 +292,9 @@ export const useCanvasDrawing = ({ canvasRef, imageUrl }: UseCanvasDrawingOption
           imageEndPoint.y - imageRect.y
         );
         ctx.setLineDash([]);
+        
+        // Restore context
+        ctx.restore();
       }
     }
     

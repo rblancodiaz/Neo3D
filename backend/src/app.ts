@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { config, paths } from './config/environment';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
-import { generalLimiter } from './middleware/rateLimiter';
+// import { generalLimiter } from './middleware/rateLimiter';
 import { stream } from './utils/logger';
 import hotelRoutes from './routes/hotels';
 import floorRoutes from './routes/floors';
@@ -20,27 +20,15 @@ app.use(helmet({
 
 // CORS configuration - Allow multiple origins for development
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests from localhost on any port during development
-    const allowedOrigins = [
-      'http://localhost:5173',
-      'http://localhost:5174', 
-      'http://localhost:5175',
-      'http://localhost:5176',
-      'http://localhost:5177',
-      'http://localhost:3000',
-      'http://localhost:3001'
-    ];
-    
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1 || config.NODE_ENV === 'development') {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174', 
+    'http://localhost:5175',
+    'http://localhost:5176',
+    'http://localhost:5177',
+    'http://localhost:3000',
+    'http://localhost:3001'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
