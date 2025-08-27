@@ -82,7 +82,20 @@ const initialViewportState: ViewportState = {
 
 export const useMapperStore = create<MapperStore>()(
   devtools(
-    (set, get) => ({
+    (set, get) => {
+      // Expose store globally for debugging and external access
+      if (typeof window !== 'undefined') {
+        (window as any).__mapperStore = {
+          getState: () => ({
+            ...get(),
+            setDrawingState: (state: Partial<DrawingState>) => set((prev) => ({
+              drawingState: { ...prev.drawingState, ...state },
+            }))
+          })
+        };
+      }
+      
+      return {
       // Initial state
       canvasRef: null,
       imageElement: null,
@@ -161,12 +174,13 @@ export const useMapperStore = create<MapperStore>()(
             rect: drawingState.currentRect,
           });
         }
+        // Don't clear currentRect immediately - keep it for saving
         set((state) => ({
           drawingState: {
             ...state.drawingState,
             isDrawing: false,
             startPoint: null,
-            currentRect: null,
+            // Keep currentRect for potential save operation
           },
         }));
       },
@@ -311,7 +325,8 @@ export const useMapperStore = create<MapperStore>()(
           history: [],
           historyIndex: -1,
         }),
-    }),
+    };
+    },
     {
       name: 'mapper-store',
     },

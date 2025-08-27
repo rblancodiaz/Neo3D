@@ -60,15 +60,73 @@ function App() {
       setEditingRoom(e.detail);
       setShowRoomForm(true);
     };
+    
+    const handleSaveChanges = () => {
+      console.log('💾 Save button clicked!');
+      // Access the mapper store directly
+      const mapperStore = (window as any).__mapperStore;
+      if (!mapperStore) {
+        console.error('💾 Mapper store not found!');
+        return;
+      }
+      
+      const state = mapperStore.getState();
+      console.log('💾 Current mapper state:', {
+        hasCurrentRect: !!state.drawingState?.currentRect,
+        currentRect: state.drawingState?.currentRect,
+        isDrawing: state.drawingState?.isDrawing
+      });
+      
+      if (state.drawingState?.currentRect && state.imageElement) {
+        console.log('💾 Found pending rectangle, converting to normalized coordinates');
+        
+        // Convert pixel coordinates to normalized (0-1) coordinates
+        const rect = state.drawingState.currentRect;
+        const image = state.imageElement;
+        const viewport = state.viewportState;
+        
+        // Convert canvas coordinates to image coordinates
+        const imageX = (rect.x - viewport.offsetX) / viewport.scale;
+        const imageY = (rect.y - viewport.offsetY) / viewport.scale;
+        const imageWidth = rect.width / viewport.scale;
+        const imageHeight = rect.height / viewport.scale;
+        
+        // Normalize to 0-1 range
+        const normalizedCoords = {
+          x: imageX / image.width,
+          y: imageY / image.height,
+          width: imageWidth / image.width,
+          height: imageHeight / image.height
+        };
+        
+        console.log('💾 Normalized coordinates:', normalizedCoords);
+        
+        // Clear the current rect after getting it
+        mapperStore.getState().setDrawingState({ currentRect: null });
+        
+        // Trigger room creation with normalized coordinates
+        window.dispatchEvent(new CustomEvent('createRoom', {
+          detail: { coordinates: normalizedCoords }
+        }));
+      } else {
+        console.log('💾 No pending changes to save');
+        showToast({
+          type: 'info',
+          message: 'Draw a rectangle first to create a room',
+        });
+      }
+    };
 
     window.addEventListener('createRoom', handleCreateRoom as EventListener);
     window.addEventListener('editRoom', handleEditRoom as EventListener);
+    window.addEventListener('saveChanges', handleSaveChanges as EventListener);
 
     return () => {
       window.removeEventListener('createRoom', handleCreateRoom as EventListener);
       window.removeEventListener('editRoom', handleEditRoom as EventListener);
+      window.removeEventListener('saveChanges', handleSaveChanges as EventListener);
     };
-  }, []);
+  }, [showToast]);
 
   const handleImageUpload = async (file: File) => {
     console.log('🔥 APP UPLOAD: Starting handleImageUpload with file:', {

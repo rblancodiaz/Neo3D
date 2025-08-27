@@ -505,7 +505,25 @@ export const useHotelStore = create<HotelStore>()(
         try {
           const response = await hotelApi.getRooms(floorId);
           // The API returns { success: true, data: { rooms: Room[] } }
-          const rooms = (response.data as any).data || [];
+          const rawRooms = (response.data as any).data?.rooms || (response.data as any).data || [];
+          
+          // Transform backend room format to frontend format
+          const rooms = rawRooms.map((room: any) => ({
+            ...room,
+            coordinates: room.coordinates || {
+              x: room.xCoordinate || room.x_coordinate || 0,
+              y: room.yCoordinate || room.y_coordinate || 0,
+              width: room.width || 0,
+              height: room.height || 0
+            }
+          }));
+          
+          console.log('🔥 HOTELSTORE: Fetched and transformed rooms:', { 
+            count: rooms.length,
+            firstRoom: rooms[0],
+            hasCoordinates: rooms.length > 0 ? !!rooms[0].coordinates : false
+          });
+          
           set({ rooms, isLoadingRooms: false });
         } catch (error: any) {
           set({
@@ -528,7 +546,18 @@ export const useHotelStore = create<HotelStore>()(
           const roomData = { ...data, coordinates };
           const response = await hotelApi.createRoom(floorId, roomData);
           // The API returns { success: true, data: { room: Room } }
-          const newRoom = (response.data as any).data.room;
+          const rawRoom = (response.data as any).data.room || (response.data as any).data;
+          
+          // Transform backend room format to frontend format
+          const newRoom = {
+            ...rawRoom,
+            coordinates: rawRoom.coordinates || {
+              x: rawRoom.xCoordinate || rawRoom.x_coordinate || 0,
+              y: rawRoom.yCoordinate || rawRoom.y_coordinate || 0,
+              width: rawRoom.width || 0,
+              height: rawRoom.height || 0
+            }
+          };
           
           console.log('🔥 HOTELSTORE: Room created, response:', { 
             hasRoom: !!newRoom, 
@@ -564,10 +593,22 @@ export const useHotelStore = create<HotelStore>()(
         try {
           const response = await hotelApi.updateRoom(id, data);
           // The API returns { success: true, data: { room: Room } }
-          const updatedRoom = (response.data as any).data.room;
-          if (!updatedRoom) {
+          const rawRoom = (response.data as any).data?.room || (response.data as any).data;
+          if (!rawRoom) {
             throw new Error('No updated room data received');
           }
+          
+          // Transform backend room format to frontend format
+          const updatedRoom = {
+            ...rawRoom,
+            coordinates: rawRoom.coordinates || {
+              x: rawRoom.xCoordinate || rawRoom.x_coordinate || 0,
+              y: rawRoom.yCoordinate || rawRoom.y_coordinate || 0,
+              width: rawRoom.width || 0,
+              height: rawRoom.height || 0
+            }
+          };
+          
           set((state) => ({
             rooms: state.rooms.map((r) =>
               r.id === id ? updatedRoom : r

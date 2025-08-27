@@ -191,11 +191,35 @@ export const hotelApi = {
   getRoom: (id: string) =>
     apiClient.get<ApiResponse<Room>>(`/rooms/${id}`),
   
-  createRoom: (floorId: string, data: RoomFormData & { coordinates: NormalizedCoordinates }) =>
-    apiClient.post<ApiResponse<Room>>(`/floors/${floorId}/rooms`, data),
+  createRoom: (floorId: string, data: RoomFormData & { coordinates: NormalizedCoordinates }) => {
+    // Transform coordinates to match backend expectations
+    const { coordinates, ...roomData } = data;
+    const transformedData = {
+      ...roomData,
+      coordinates: {
+        x: coordinates.x,
+        y: coordinates.y,
+        width: coordinates.width,
+        height: coordinates.height
+      }
+    };
+    
+    console.log('🚀 API: Creating room with transformed data:', transformedData);
+    return apiClient.post<ApiResponse<Room>>(`/floors/${floorId}/rooms`, transformedData);
+  },
   
-  updateRoom: (id: string, data: Partial<Room>) =>
-    apiClient.put<ApiResponse<Room>>(`/rooms/${id}`, data),
+  updateRoom: (id: string, data: Partial<Room>) => {
+    // Transform coordinates if present
+    const transformedData = data.coordinates ? {
+      ...data,
+      xCoordinate: data.coordinates.x,
+      yCoordinate: data.coordinates.y,
+      width: data.coordinates.width,
+      height: data.coordinates.height
+    } : data;
+    
+    return apiClient.put<ApiResponse<Room>>(`/rooms/${id}`, transformedData);
+  },
   
   deleteRoom: (id: string) =>
     apiClient.delete<ApiResponse<void>>(`/rooms/${id}`),

@@ -51,15 +51,24 @@ export const RoomForm: React.FC<RoomFormProps> = ({
 
   const handleFormSubmit = async (data: RoomFormData) => {
     try {
+      console.log('🆕 RoomForm: Submitting form with data:', { 
+        isEdit: !!room, 
+        hasCoordinates: !!coordinates,
+        data,
+        coordinates 
+      });
+      
       if (room) {
         await updateRoom(room.id, data);
       } else if (currentFloor && coordinates) {
-        await createRoom(currentFloor.id, data, coordinates);
+        const newRoom = await createRoom(currentFloor.id, data, coordinates);
+        console.log('🆕 RoomForm: Room created successfully:', newRoom);
       }
       onSubmit(data);
       onClose();
     } catch (error) {
-      console.error('Failed to save room:', error);
+      console.error('🆕 RoomForm: Failed to save room:', error);
+      // TODO: Show error message to user
     }
   };
 
